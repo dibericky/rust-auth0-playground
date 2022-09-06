@@ -1,5 +1,5 @@
-mod messages;
+mod handlers;
 mod routes;
-mod auth;
+//mod types;
 
 pub use self::routes::routes;

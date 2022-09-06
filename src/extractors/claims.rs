@@ -20,7 +20,10 @@ use std::{collections::HashSet, future::Future, pin::Pin};
 #[derive(Clone, Deserialize)]
 pub struct Auth0Config {
     audience: String,
-    domain: String,
+    pub domain: String,
+    pub client_id: String,
+    pub connection: String,
+    pub redirect_url: String
 }
 
 impl Default for Auth0Config {
