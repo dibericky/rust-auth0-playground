@@ -1,6 +1,5 @@
 use crate::{
     authentication::{Auth0, AuthCodeUrl, Authentication},
-    extractors::Auth0Config,
 };
 use actix_web::{get, web, Responder, HttpResponse};
 
@@ -16,7 +15,13 @@ pub async fn logout() -> impl Responder {
     "logout".to_string()
 }
 
+struct CallbackRequest {
+    code: String
+}
+
 #[get("/callback")]
-pub async fn callback() -> impl Responder {
+pub async fn callback(auth: web::Data<Auth0>, query) -> impl Responder {
+     // verify that token is signed by the expected issuer (auth0? )
+    
     "callback".to_string()
 }

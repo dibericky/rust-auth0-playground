@@ -4,11 +4,11 @@ mod extractors;
 mod middlewares;
 mod types;
 
+use actix_web::{get, web, Responder};
 use actix_web::{App, HttpServer};
 use authentication::Auth0;
-use dotenv::dotenv;
-use actix_web::{get, web, Responder};
 use authentication::AuthCodeUrl;
+use dotenv::dotenv;
 
 use crate::authentication::Authentication;
 
@@ -32,11 +32,4 @@ async fn main() -> std::io::Result<()> {
     .bind((config.host, config.port))?
     .run()
     .await
-}
-
-#[get("/login")]
-pub async fn login(auth: web::Data<Auth0>) -> impl Responder {
-    let AuthCodeUrl(auth_url) = auth.get_auth_url();
-
-    auth_url
 }
