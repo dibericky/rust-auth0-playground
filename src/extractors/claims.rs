@@ -127,7 +127,7 @@ impl FromRequest for Claims {
                 AlgorithmParameters::RSA(ref rsa) => {
                     let mut validation = Validation::new(Algorithm::RS256);
                     validation.set_audience(&[config.audience]);
-                    validation.set_iss(&[Uri::builder()
+                    validation.set_issuer(&[Uri::builder()
                         .scheme("https")
                         .authority(domain)
                         .path_and_query("/")
