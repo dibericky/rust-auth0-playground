@@ -1,7 +1,6 @@
-use crate::{
-    authentication::{Auth0, AuthCodeUrl, Authentication},
-};
-use actix_web::{get, web, Responder, HttpResponse};
+use crate::authentication::{Auth0, AuthCodeUrl, Authentication};
+use actix_web::{get, web, HttpResponse, Responder};
+use serde::Deserialize;
 
 #[get("/login")]
 pub async fn login(auth: web::Data<Auth0>) -> impl Responder {
@@ -15,13 +14,21 @@ pub async fn logout() -> impl Responder {
     "logout".to_string()
 }
 
+#[derive(Deserialize)]
 struct CallbackRequest {
-    code: String
+    code: String,
 }
 
 #[get("/callback")]
-pub async fn callback(auth: web::Data<Auth0>, query) -> impl Responder {
-     // verify that token is signed by the expected issuer (auth0? )
-    
+pub async fn callback(
+    auth: web::Data<Auth0>,
+    query: web::Query<CallbackRequest>,
+) -> impl Responder {
+    let code = &query.code;
+
+    let token = auth.exchange(code).await;
+
+    // verify that token is signed by the expected issuer (auth0? )
+
     "callback".to_string()
 }
