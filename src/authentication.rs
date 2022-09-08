@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 use async_trait::async_trait;
 
 use anyhow::Result;
@@ -55,20 +57,21 @@ impl Authentication for Auth0 {
         let domain = &self.domain;
         let api_url = format!("https://{domain}/oauth/token");
 
-        let query = vec![
-            ("grant_type", "authorization_code"),
-            ("code", code),
-            ("client_id", &self.client_id),
-        ];
-        // let response = reqwest::Client::new()
-        //     .get(api_url)
-        //     .query(&query)
-        //     .send()
-        //     .await?
-        //     .text()
-        //     .await?;
+        let mut body = HashMap::new();
+        body.insert("grant_type", "authorization_code");
+        body.insert("code", code);
+        body.insert("client_id", &self.client_id);
+        println!("BODY {:?}", body);
+        println!("API URL {api_url}");
+        let response = reqwest::Client::new()
+            .post(api_url)
+            .json(&body)
+            .send()
+            .await?
+            .text()
+            .await?;
 
-        println!("RESPONSE {code}");
+        println!("RESPONSE {response}");
         Ok(Token("ciao".to_string()))
     }
 }

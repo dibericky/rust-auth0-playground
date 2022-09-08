@@ -24,7 +24,8 @@ async fn main() -> std::io::Result<()> {
             .app_data(auth0_config.clone())
             .app_data(web::Data::new(authentication.clone()))
             .wrap(middlewares::cors(&config.client_origin_url))
-            .wrap(middlewares::err_handlers())
+            // TODO: how to error handling with current version of actix_web?
+            // .wrap(middlewares::err_handlers())
             .wrap(middlewares::security_headers())
             .wrap(middlewares::logger())
             .service(api::routes())

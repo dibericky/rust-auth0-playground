@@ -1,6 +1,5 @@
 use crate::types::ErrorMessage;
 use actix_web::{
-    client::Client,
     error::ResponseError,
     http::{StatusCode, Uri},
     Error, FromRequest, HttpResponse,
@@ -15,6 +14,7 @@ use jsonwebtoken::{
     Algorithm, DecodingKey, Validation,
 };
 use serde::Deserialize;
+use reqwest::Client;
 use std::{collections::HashSet, future::Future, pin::Pin};
 
 #[derive(Clone, Deserialize)]
@@ -91,7 +91,6 @@ pub struct Claims {
 impl FromRequest for Claims {
     type Error = Error;
     type Future = Pin<Box<dyn Future<Output = Result<Self, Self::Error>>>>;
-    type Config = ();
 
     fn from_request(
         req: &actix_web::HttpRequest,
@@ -109,17 +108,17 @@ impl FromRequest for Claims {
             let domain = config.domain.as_str();
             let jwks: JwkSet = Client::new()
                 .get(
-                    Uri::builder()
-                        .scheme("https")
-                        .authority(domain)
-                        .path_and_query("/.well-known/jwks.json")
-                        .build()
-                        .unwrap(),
+                    format!("https://{domain}/.well-known/jwks.json")
                 )
                 .send()
-                .await?
+                .await
+                .map_err(|_| "unable to get jwks")
+                // TODO: error handler
+                .unwrap()
                 .json()
-                .await?;
+                .await
+                // TODO: error handler
+                .unwrap();
             let jwk = jwks
                 .find(&kid)
                 .ok_or_else(|| ClientError::NotFound("No JWK found for kid".to_string()))?;
