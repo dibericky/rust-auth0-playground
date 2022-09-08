@@ -1,5 +1,5 @@
 use crate::authentication::{Auth0, AuthCodeUrl, Authentication};
-use actix_web::{cookie::Cookie, get, http::header, web, HttpResponse, Responder};
+use actix_web::{cookie::Cookie, get, http::header, web, HttpResponse, Responder, Result};
 use reqwest::StatusCode;
 use serde::Deserialize;
 
@@ -33,23 +33,22 @@ fn create_cookie<'a>(key: &'a str, value: &'a str) -> Cookie<'a> {
 pub async fn callback(
     auth: web::Data<Auth0>,
     query: web::Query<CallbackRequest>,
-) -> impl Responder {
+) -> Result<HttpResponse> {
     let code = &query.code;
 
     let token = auth
         .exchange(code)
-        .await
-        // TODO: error handling
-        .unwrap();
+        .await.map_err(crate::types::create_err)?;
 
     // verify that token is signed by the expected issuer (auth0? )
 
     let access_token = create_cookie("atk", &token.access_token);
     let id_token = create_cookie("itk", &token.id_token);
 
-    HttpResponse::Found()
+    Ok(HttpResponse::Found()
         .cookie(access_token)
         .cookie(id_token)
         .append_header(("Location", "http://localhost:6060/api/messages/public"))
-        .finish()
+        .finish())
 }
+
