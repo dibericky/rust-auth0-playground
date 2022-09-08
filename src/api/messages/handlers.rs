@@ -25,12 +25,17 @@ pub async fn protected(_claims: Claims) -> impl Responder {
 }
 
 #[get("/public")]
-pub async fn public() -> impl Responder {
+pub async fn public(req: actix_web::HttpRequest) -> impl Responder {
+    let cookies = req.cookies().unwrap()
+        .iter()
+        .map(|c| c.to_string())
+        .collect::<Vec<_>>()
+        .join(",");
     web::Json(Message {
         metadata: Metadata {
             api: "api_actix-web_rust_hello-world".to_string(),
             branch: "basic-authorization".to_string(),
         },
-        text: "This is a public message.".to_string(),
+        text: cookies, 
     })
 }

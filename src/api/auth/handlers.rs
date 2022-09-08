@@ -1,5 +1,5 @@
 use crate::authentication::{Auth0, AuthCodeUrl, Authentication};
-use actix_web::{cookie::Cookie, get, web, HttpResponse, Responder};
+use actix_web::{cookie::Cookie, get, http::header, web, HttpResponse, Responder};
 use reqwest::StatusCode;
 use serde::Deserialize;
 
@@ -7,7 +7,9 @@ use serde::Deserialize;
 pub async fn login(auth: web::Data<Auth0>) -> impl Responder {
     let AuthCodeUrl(auth_url) = auth.get_auth_url();
 
-    HttpResponse::Found().header("Location", auth_url).finish()
+    HttpResponse::Found()
+        .append_header(("Location", auth_url))
+        .finish()
 }
 
 #[get("/logout")]
@@ -18,6 +20,13 @@ pub async fn logout() -> impl Responder {
 #[derive(Deserialize)]
 pub struct CallbackRequest {
     code: String,
+}
+
+fn create_cookie<'a>(key: &'a str, value: &'a str) -> Cookie<'a> {
+    Cookie::build(key, value)
+        .domain("localhost")
+        .path("/")
+        .finish()
 }
 
 #[get("/callback")]
@@ -35,11 +44,12 @@ pub async fn callback(
 
     // verify that token is signed by the expected issuer (auth0? )
 
-    let access_token = Cookie::new("atk", token.access_token);
-    let id_token = Cookie::new("itk", token.id_token);
+    let access_token = create_cookie("atk", &token.access_token);
+    let id_token = create_cookie("itk", &token.id_token);
 
-    HttpResponse::build(StatusCode::OK)
+    HttpResponse::Found()
         .cookie(access_token)
         .cookie(id_token)
+        .append_header(("Location", "http://localhost:6060/api/messages/public"))
         .finish()
 }
