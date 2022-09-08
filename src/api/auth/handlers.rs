@@ -15,7 +15,7 @@ pub async fn logout() -> impl Responder {
 }
 
 #[derive(Deserialize)]
-struct CallbackRequest {
+pub struct CallbackRequest {
     code: String,
 }
 
@@ -26,9 +26,13 @@ pub async fn callback(
 ) -> impl Responder {
     let code = &query.code;
 
-    let token = auth.exchange(code).await;
+    let token = auth
+        .exchange(code)
+        .await
+        // TODO: error handling
+        .unwrap();
 
     // verify that token is signed by the expected issuer (auth0? )
 
-    "callback".to_string()
+    web::Json(token)
 }
