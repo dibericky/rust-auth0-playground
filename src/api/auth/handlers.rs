@@ -1,5 +1,6 @@
 use crate::authentication::{Auth0, AuthCodeUrl, Authentication};
-use actix_web::{get, web, HttpResponse, Responder};
+use actix_web::{cookie::Cookie, get, web, HttpResponse, Responder};
+use reqwest::StatusCode;
 use serde::Deserialize;
 
 #[get("/login")]
@@ -34,5 +35,11 @@ pub async fn callback(
 
     // verify that token is signed by the expected issuer (auth0? )
 
-    web::Json(token)
+    let access_token = Cookie::new("atk", token.access_token);
+    let id_token = Cookie::new("itk", token.id_token);
+
+    HttpResponse::build(StatusCode::OK)
+        .cookie(access_token)
+        .cookie(id_token)
+        .finish()
 }

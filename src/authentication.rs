@@ -33,11 +33,11 @@ pub struct Token(pub String);
 
 #[derive(Deserialize, Serialize)]
 pub struct ExchangeTokenResponse {
-    access_token: String,
-    id_token: String,
+    pub access_token: String,
+    pub id_token: String,
     scope: String,
     expires_in: u32,
-    token_type: String
+    token_type: String,
 }
 
 impl AuthCodeUrl {
@@ -63,6 +63,7 @@ impl Authentication for Auth0 {
         let audience = self.audience.clone();
         let scope = "openid%20profile%20email";
         let url = format!("https://{domain}/authorize?audience={audience}&scope={scope}&response_type={response_type}&client_id={client_id}&connection={connection}&redirect_uri={redirect_uri}");
+        println!("URL: {url}");
         AuthCodeUrl(url)
     }
 
