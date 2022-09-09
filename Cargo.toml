@@ -10,6 +10,7 @@ rust-version = "1.56"
 [dependencies]
 actix-cors = "^0.6"
 actix-web = { version = "^4.1" , features = ["rustls"] }
+actix-session = { version = "0.7", features = ["redis-actor-session"] }
 actix-web-httpauth = "^0.8"
 derive_more = "^0.99.16"
 dotenv = "^0.15.0"

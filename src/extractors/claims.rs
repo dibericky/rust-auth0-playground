@@ -50,6 +50,13 @@ impl Default for RedisConfig {
     }
 }
 
+impl RedisConfig {
+    pub fn url(self: &Self) -> String {
+        format!("{}:{}", self.host, self.port)
+        //format!("{}:{}@{}:{}", self.username, self.password, self.host, self.port)
+    }
+}
+
 #[derive(Debug, Display)]
 enum ClientError {
     #[display(fmt = "authentication")]

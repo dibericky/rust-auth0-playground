@@ -3,15 +3,15 @@ mod authentication;
 mod extractors;
 mod middlewares;
 mod types;
-mod cache;
 
 use std::sync::Arc;
 
+use actix_session::SessionMiddleware;
+use actix_session::storage::RedisActorSessionStore;
 use actix_web::{get, web, Responder};
 use actix_web::{App, HttpServer};
 use authentication::Auth0;
 use authentication::AuthCodeUrl;
-use cache::{RedisCache, Cache};
 use dotenv::dotenv;
 
 use crate::authentication::Authentication;
@@ -26,12 +26,22 @@ async fn main() -> std::io::Result<()> {
     let authentication = Auth0::new(&auth0_config);
     
     let redis_config = extractors::RedisConfig::default();
-    let cache = RedisCache::new(redis_config).await.unwrap();
+    let redis_url = redis_config.url();
+    println!("redis url: {}", redis_url);    
+    let private_key = actix_web::cookie::Key::generate();
 
     HttpServer::new(move || {
         App::new()
             .app_data(auth0_config.clone())
-          //  .app_data(web::Data::new(cache))
+            .wrap(
+                SessionMiddleware::builder(
+                    //TODO: how to set password?
+                    RedisActorSessionStore::new(&redis_url),
+                    private_key.clone(),
+                )
+                .cookie_name("test-session".to_string())
+                .build(),
+            )
             .app_data(web::Data::new(authentication.clone()))
             .wrap(middlewares::cors(&config.client_origin_url))
             // TODO: how to error handling with current version of actix_web?

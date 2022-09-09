@@ -1,4 +1,5 @@
 use crate::authentication::{Auth0, AuthCodeUrl, Authentication};
+use actix_session::Session;
 use actix_web::{cookie::Cookie, get, http::header, web, HttpResponse, Responder, Result};
 use reqwest::StatusCode;
 use serde::Deserialize;
@@ -31,6 +32,7 @@ fn create_cookie<'a>(key: &'a str, value: &'a str) -> Cookie<'a> {
 
 #[get("/callback")]
 pub async fn callback(
+    session: Session,
     auth: web::Data<Auth0>,
     query: web::Query<CallbackRequest>,
 ) -> Result<HttpResponse> {
@@ -45,10 +47,17 @@ pub async fn callback(
     let access_token = create_cookie("atk", &token.access_token);
     let id_token = create_cookie("itk", &token.id_token);
 
+    println!("LOOOOOOOOOOOL");
+    let ok_insert = session.insert("pippo", "aaa");
+    if ok_insert.is_err() {
+        println!("ERR: {:?}", ok_insert.unwrap_err());
+    }
+    // session.renew();
+
     Ok(HttpResponse::Found()
         .cookie(access_token)
         .cookie(id_token)
-        .append_header(("Location", "http://localhost:6060/api/messages/public"))
+        // .append_header(("Location", "http://localhost:6060/api/messages/public"))
         .finish())
 }
 
