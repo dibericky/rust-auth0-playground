@@ -52,8 +52,8 @@ impl Default for RedisConfig {
 
 impl RedisConfig {
     pub fn url(self: &Self) -> String {
-        format!("{}:{}", self.host, self.port)
-        //format!("{}:{}@{}:{}", self.username, self.password, self.host, self.port)
+        // format!("{}:{}", self.host, self.port)
+        format!("redis://{}:{}@{}:{}", self.username, self.password, self.host, self.port)
     }
 }
 

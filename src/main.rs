@@ -7,7 +7,7 @@ mod types;
 use std::sync::Arc;
 
 use actix_session::SessionMiddleware;
-use actix_session::storage::RedisActorSessionStore;
+use actix_session::storage::RedisSessionStore;
 use actix_web::{get, web, Responder};
 use actix_web::{App, HttpServer};
 use authentication::Auth0;
@@ -29,14 +29,14 @@ async fn main() -> std::io::Result<()> {
     let redis_url = redis_config.url();
     println!("redis url: {}", redis_url);    
     let private_key = actix_web::cookie::Key::generate();
-
+    let redis_store = RedisSessionStore::new(&redis_url).await.unwrap();
     HttpServer::new(move || {
         App::new()
             .app_data(auth0_config.clone())
             .wrap(
                 SessionMiddleware::builder(
                     //TODO: how to set password?
-                    RedisActorSessionStore::new(&redis_url),
+                    redis_store.clone(),
                     private_key.clone(),
                 )
                 .cookie_name("test-session".to_string())
