@@ -44,20 +44,12 @@ pub async fn callback(
 
     // verify that token is signed by the expected issuer (auth0? )
 
-    let access_token = create_cookie("atk", &token.access_token);
-    let id_token = create_cookie("itk", &token.id_token);
-
-    println!("LOOOOOOOOOOOL");
-    let ok_insert = session.insert("pippo", "aaa");
-    if ok_insert.is_err() {
-        println!("ERR: {:?}", ok_insert.unwrap_err());
-    }
-    // session.renew();
+    session.insert("access_token", token.access_token.clone())?;
+    session.insert("id_token", token.id_token.clone())?;
+    session.renew();
 
     Ok(HttpResponse::Found()
-        .cookie(access_token)
-        .cookie(id_token)
-        // .append_header(("Location", "http://localhost:6060/api/messages/public"))
+        .append_header(("Location", "http://localhost:6060/api/messages/public"))
         .finish())
 }
 

@@ -1,5 +1,5 @@
 use super::handlers;
-use actix_web::{web, Scope};
+use actix_web::{web::{self, resource}, Scope};
 
 pub fn routes() -> Scope {
     web::scope("/messages")
