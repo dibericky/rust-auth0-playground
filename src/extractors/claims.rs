@@ -34,6 +34,22 @@ impl Default for Auth0Config {
     }
 }
 
+#[derive(Clone, Deserialize)]
+pub struct RedisConfig {
+    pub host: String,
+    pub port: u32,
+    pub password: String,
+    pub username: String
+} 
+
+impl Default for RedisConfig {
+    fn default() -> Self {
+        envy::prefixed("REDIS_")
+            .from_env()
+            .expect("Provide missing environment variables for Redis client")
+    }
+}
+
 #[derive(Debug, Display)]
 enum ClientError {
     #[display(fmt = "authentication")]

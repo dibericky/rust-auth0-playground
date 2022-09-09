@@ -1,4 +1,4 @@
-FROM rust:1.58-slim-buster@sha256:9c8f5415ae79aad6337ab366293270846769d4b5f06a08c619a983c4c65d53de AS builder
+FROM rust:1.63 AS builder
 RUN groupadd auth0 && useradd -m developer -g auth0
 USER developer
 RUN mkdir /home/developer/app
